@@ -45,9 +45,9 @@ body::before{
 
 /* ─── Side Panels ─── */
 .panel{
-  width:112px;background:#07071c;
-  padding:8px;
-  display:flex;flex-direction:column;gap:8px;
+  width:84px;background:#07071c;
+  padding:6px;
+  display:flex;flex-direction:column;gap:6px;
 }
 .panel.left{border-right:3px solid #6655bb;}
 .panel.right{border-left:3px solid #6655bb;}
@@ -105,6 +105,22 @@ canvas#tetris{display:block;background:#000510;image-rendering:pixelated;}
 /* ─── Controls ─── */
 .ctxt{font-size:5px;color:#333355;line-height:2.2;}
 
+/* ─── Hard Drop Button ─── */
+#hardbtn{
+  position:absolute;right:6px;bottom:6px;
+  width:44px;height:44px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:8px;
+  color:rgba(255,255,255,0.6);
+  font-family:'Press Start 2P',monospace;
+  font-size:9px;
+  cursor:pointer;
+  backdrop-filter:blur(2px);
+  touch-action:manipulation;
+}
+#hardbtn:active{background:rgba(255,255,255,0.25);}
+
 /* ─── Level progress bar ─── */
 .progwrap{width:100%;height:4px;background:#111130;border:1px solid #332266;margin-top:6px;}
 .progbar{height:100%;background:linear-gradient(90deg,#5533ff,#aa44ff);transition:width .3s;}
@@ -145,11 +161,12 @@ canvas#tetris{display:block;background:#000510;image-rendering:pixelated;}
 
     <!-- ─── MAIN CANVAS ─── -->
     <div class="cvswrap">
-      <canvas id="tetris" width="240" height="480"></canvas>
+      <canvas id="tetris" width="200" height="400"></canvas>
       <div id="ov" class="hide">
         <div class="ovttl" id="ov-ttl">GAME OVER</div>
         <div class="ovsub" id="ov-sub">PRESS ENTER</div>
       </div>
+      <button id="hardbtn">▼▼</button>
     </div>
 
     <!-- ─── RIGHT PANEL ─── -->
@@ -184,7 +201,7 @@ const ctx = cv.getContext('2d');
 const nc  = document.getElementById('nxt');
 const nCtx= nc.getContext('2d');
 
-const W=10, H=20, B=24;   // board cols, rows, block px
+const W=10, H=20, B=20;   // board cols, rows, block px
 
 // ── Colors (index = value in matrix) ──────────────
 const COL = [
@@ -580,7 +597,7 @@ document.addEventListener('keyup',e=>{
 // ═══════════════════════════════════════════════════
 //  INPUT — Touch
 // ═══════════════════════════════════════════════════
-let tx=0,ty=0,lastTap=0,tmoved=false;
+let tx=0,ty=0,tmoved=false;
 
 cv.addEventListener('touchstart',e=>{
   e.preventDefault();
@@ -598,12 +615,13 @@ cv.addEventListener('touchmove',e=>{
 
 cv.addEventListener('touchend',e=>{
   e.preventDefault();
-  const now=Date.now();
-  if(!tmoved){
-    if(now-lastTap<280) hard();
-    else rot(1);
-    lastTap=now;
-  }
+  if(!tmoved) rot(1); // 항상 시계방향 회전
+},{passive:false});
+
+// Hard drop button
+document.getElementById('hardbtn').addEventListener('touchstart',e=>{
+  e.preventDefault();
+  hard(); updUI();
 },{passive:false});
 
 // ─── Start ────────────────────────────────────────
